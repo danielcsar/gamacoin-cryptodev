@@ -11,7 +11,8 @@ contract GamaSail {
   using Math for uint256;
 
   // Properties
-  uint256 public tokenPrice = 1 ether;
+  uint256 public tokenBuyPrice = 1 ether;
+  uint256 public tokenSellPrice = 1 ether;
   uint256 public tokensSold;
   uint256 private balance;
 
@@ -38,30 +39,72 @@ contract GamaSail {
     requestBalance();
   }
 
-  // Public Functions
+  // Getters and Setters
   /*
-  * @function Devolve a quantidade de tokens que pertencem ao contrato.
+  * @function Retorna a quantidade de tokens que pertencem ao contrato.
   */
   function getBalance() public view returns (uint256) {
     return gamaCoin.balanceOf(address(this));
   }
 
   /*
-  * @function Devolve a quantidade de ethers que pertencem ao contrato.
+  * @function Retorna a quantidade de tokens vendidos.
+  */
+  function getTokensSold() public view returns (uint256){
+    return tokensSold;
+  }
+
+  /*
+  * @function Retorna a quantidade de ethers que pertencem ao contrato.
   */
   function getBalanceEthers() public view returns (uint256){
     return address(this).balance;
   }
 
   /*
+  * @function Retorna o preço de compra dos tokens.
+  */
+  function getTokenBuyPrice() public view returns (uint256){
+    return tokenBuyPrice;
+  }
+
+  /*
+  * @function Retorna o preço de venda dos tokens.
+  */
+  function getTokenSellPrice() public view returns (uint256){
+    return tokenSellPrice;
+  }
+
+  /*
+  * @function Altera o preço de compra dos tokens.
+  * Retorna um valor booleano indicando se a operação foi bem sucedida.
+  */
+  function setTokenBuyPrice(uint256 _newPrice) public isOwner returns (bool){
+    require(_newPrice.greaterThan(0, "Only positive values are accepted."));
+    tokenBuyPrice = _newPrice;
+    return true;
+  }
+
+  /*
+  * @function Altera o preço de venda dos tokens.
+  * Retorna um valor booleano indicando se a operação foi bem sucedida.
+  */
+  function setTokenSellPrice(uint256 _newPrice) public isOwner returns (bool){
+    require(_newPrice.greaterThan(0, "Only positive values are accepted."));
+    tokenSellPrice = _newPrice;
+    return true;
+  }
+
+  // Public Functions
+  /*
   * @function Compra tokens utilizando ethers enviados pelo msg.sender,
   * Retorna um valor booleano indicando se a operação foi bem sucedida.
   */
   function buyTokens() public payable returns(bool){
     require(msg.value.greaterThan(0, "Only positive values are accepted."));
-    require(msg.value.greaterOrEqual(tokenPrice, "Insuficient amount"));
-    uint256 value = msg.value.div(tokenPrice);
-    require(gamaCoin.balanceOf(address(this)) >= value);
+    require(msg.value.greaterOrEqual(tokenBuyPrice, "Insuficient amount"));
+    uint256 value = msg.value.div(tokenBuyPrice);
+    require(gamaCoin.balanceOf(address(this)).greaterOrEqual(value,"Insuficient amount of tokens in contract"));
     require(gamaCoin.transfer(msg.sender, value));
 
     tokensSold += value;
@@ -74,7 +117,7 @@ contract GamaSail {
   */
   function sellTokens(uint256 _tokensToSell) public returns(bool){
     require(_tokensToSell.greaterThan(0, "Only positive values are accepted."));
-    uint256 value = _tokensToSell.mul(tokenPrice);
+    uint256 value = _tokensToSell.mul(tokenSellPrice);
     require(getBalanceEthers() >= value, "Contract without sufficient balance.");
     require(gamaCoin.balanceOf(msg.sender) >= _tokensToSell, "Sender without sufficient balance.");
     require(gamaCoin.transferFrom(msg.sender, address(this), _tokensToSell));
