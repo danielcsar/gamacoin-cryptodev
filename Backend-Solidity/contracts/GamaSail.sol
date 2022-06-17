@@ -121,7 +121,8 @@ contract GamaSail {
     require(gamaCoin.balanceOf(msg.sender) >= _tokensToSell, "Sender without sufficient balance.");
     require(gamaCoin.transferFrom(msg.sender, address(this), _tokensToSell));
     payable(msg.sender).transfer(value);
-    //Sell(msg.sender, _numberOfTokens);
+
+    //emit Sell(msg.sender, _numberOfTokens);
     return true;
   }
 

@@ -15,34 +15,47 @@ describe("GamaSail", async function () {
     assert.equal(await sail.getBalance(), 1000);
   }),
 
-  it("Get token balance of one address", async function() {
-    // Instances
-    const [owner, wallet1, wallet2 ] = await ethers.getSigners();
-    const Token = await ethers.getContractFactory("GamaCoin", owner);
-    const token = await Token.deploy(2000);
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
-    //balanceOf(address _account);
-  }),
-
   it("Get total tokens sold by the GamaSail contract", async function() {
     //Instances
-    const [owner, wallet1, wallet2 ] = await ethers.getSigners();
+    const [owner, wallet1] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
     const Sail = await ethers.getContractFactory("GamaSail", owner);
     const sail = await Sail.deploy(token.address);
-    //getTokensSold();
+
+    // Assertions
+    assert.equal(await sail.getTokensSold(), 0);
+    
+    // Buying 1 token;
+    const amount = ethers.utils.parseEther("1.0");
+    await sail.connect(wallet1).buyTokens({ value: amount });
+
+    // Assertions
+    assert.equal(await sail.getTokensSold(), 1);
   }),
 
   it("Get ethers balance of the GamaSail contract", async function() {
     //Instances
-    const [owner, wallet1, wallet2 ] = await ethers.getSigners();
+    const [owner, wallet1 ] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
     const Sail = await ethers.getContractFactory("GamaSail", owner);
     const sail = await Sail.deploy(token.address);
-    //getBalanceEthers();
+    
+    // Assertions
+    const zero = ethers.utils.parseEther("0");
+    const balanceBefore = await sail.getBalanceEthers();
+
+    expect(balanceBefore).to.be.equals(zero);
+    
+    // Buying 1 token;
+    const amount = ethers.utils.parseEther("1.0");
+    await sail.connect(owner).addEthers({ value: amount })
+
+    // Assertions
+    const balanceAfter = await sail.getBalanceEthers();
+    
+    expect(balanceAfter).to.be.equals(amount);
   }),
 
   it("Getters and Setters TokenPrices", async () => {
