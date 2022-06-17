@@ -58,6 +58,9 @@ contract GamaCoin is IERC20 {
         return owner;
     }
 
+    function getStatus() public view returns(Status) {
+        return status;
+    }
     function balanceOf(address _account) external override view returns (uint256){
         return addressToBalance[_account];
     }
@@ -91,19 +94,28 @@ contract GamaCoin is IERC20 {
     function transferFrom(address _from, address _to, uint256 _value) external override returns (bool){
         require(status == Status.ACTIVE, "The contract is not active.");
         require(_value <= addressToBalance[_from]);
-        //require(_value <= allowances[_from][msg.sender]);
+        // require(_value <= allowances[_from][msg.sender]);
 
         addressToBalance[_from] -= _value;
         addressToBalance[_to] += _value;
 
-        //allowances[_from][msg.sender] -= _value;
+        // allowances[_from][msg.sender] -= _value;
 
         emit Transfer(_from, _to, _value);
 
         return true;
     }
 
-    // Private Functions
+    function changeStatus(uint256 _status) public isOwner {
+        // ACTIVE = 0, PAUSED = 1, CANCELLED = 2
+        if(_status == 0){
+            status = Status.ACTIVE;
+        } else if (_status == 1){
+            status = Status.PAUSED;
+        } else if (_status == 2){
+            status = Status.CANCELLED;
+        }
+    }
 
     // Kill
     function kill() public isOwner payable {

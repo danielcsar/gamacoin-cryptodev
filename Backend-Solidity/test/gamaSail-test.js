@@ -36,7 +36,7 @@ describe("GamaSail", async function () {
 
   it("Get ethers balance of the GamaSail contract", async function() {
     //Instances
-    const [owner, wallet1 ] = await ethers.getSigners();
+    const [owner] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
     const Sail = await ethers.getContractFactory("GamaSail", owner);
@@ -60,7 +60,7 @@ describe("GamaSail", async function () {
 
   it("Getters and Setters TokenPrices", async () => {
     // Instances
-    const [owner, wallet1, wallet2 ] = await ethers.getSigners();
+    const [owner] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
     const Sail = await ethers.getContractFactory("GamaSail", owner);
@@ -89,7 +89,7 @@ describe("GamaSail", async function () {
 
   it("Buying Tokens", async function() {
     //Instances
-    const [owner, wallet1, wallet2 ] = await ethers.getSigners();
+    const [owner, wallet1] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
 
@@ -97,7 +97,6 @@ describe("GamaSail", async function () {
     const sail = await Sail.deploy(token.address);
     
     // Trying to buy with 0 ethers
-    const zero = ethers.utils.parseEther("0");
     expect(sail.connect(wallet1).buyTokens({ value: 0 }))
       .to.be.revertedWith("Only positive values are accepted.");
 
