@@ -1,4 +1,6 @@
+/*
 const { expect } = require("chai");
+const { BigNumber } = require("ethers");
 const { ethers } = require("hardhat");
 
 describe("Token", function () {
@@ -8,15 +10,23 @@ describe("Token", function () {
     const token = await Token.deploy(1000);
 
     const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Token.deploy(token.address);
+    const sail = await Sail.deploy(token.address);
+    const amount = ethers.utils.parseEther("1.0");
 
-    expect().to.equal();
+    //Transaction
+    await token.connect(owner).transfer(sail.address, 1000);
 
-    const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
+    await sail.connect(wallet1).buyTokens({ value: amount });
 
-    // wait until the transaction is mined
-    await setGreetingTx.wait();
+    // const newOwnerBalance = await token.balanceOf(owner.address);
+    const newWallet1Balance = await wallet1.getBalance();
+    
+    
+    await sail.connect(wallet1).sellTokens(1);
+    
+    const sailBalance = await wallet1.getBalance();
 
-    expect(await greeter.greet()).to.equal("Hola, mundo!");
+    console.log(ethers.utils.formatUnits(sailBalance) - ethers.utils.formatUnits(newWallet1Balance));
   });
 });
+*/

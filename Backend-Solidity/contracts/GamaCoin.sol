@@ -32,7 +32,6 @@ contract GamaCoin is IERC20 {
   
     // Constructor
     constructor(uint256 _inicialSupply) {
-        console.log("Deploying a GamaCoin");
         totalSupply = _inicialSupply;
         owner = msg.sender;
         addressToBalance[owner] = _inicialSupply;

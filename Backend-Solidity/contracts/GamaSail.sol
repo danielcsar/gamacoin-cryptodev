@@ -15,11 +15,11 @@ contract GamaSail {
   uint256 public tokenSellPrice = 1 ether;
   uint256 public tokensSold;
   uint256 private balance;
+  address payable private owner;
 
   address public tokenAddress;
   address private tokenOwner;
   GamaCoin private gamaCoin;
-  address payable private owner;
   address payable contractAddress = payable(address(this));
 
   // Modifiers
@@ -30,13 +30,12 @@ contract GamaSail {
 
   // Constructor
   constructor(address _token) {
-    console.log("Deploying a GamaSail");
     owner = payable(msg.sender);
     tokenAddress = _token;
     gamaCoin = GamaCoin(tokenAddress);
     tokenOwner = gamaCoin.getOwner();
     balance = gamaCoin.balanceOf(address(this));
-    requestBalance();
+    addTokens(gamaCoin.getTotalSupply().div(2));
   }
 
   // Getters and Setters
@@ -113,7 +112,7 @@ contract GamaSail {
 
   /*
   * @function Vende tokens enviados pelo msg.sender,
-  * Retorna um valor booleano indicando se a operação foi bem sucedida.
+  * Returns a boolean value indicating whether the operation succeeded.
   */
   function sellTokens(uint256 _tokensToSell) public returns(bool){
     require(_tokensToSell.greaterThan(0, "Only positive values are accepted."));
@@ -127,19 +126,32 @@ contract GamaSail {
   }
 
   /*
+  * @function Add Ethers in the contract.
+  * Returns a boolean value indicating whether the operation succeeded.
+  */
+  function addEthers() public isOwner payable returns(bool){
+    require(msg.value.greaterThan(0, "Only positive values are accepted."));
+    return true;
+  }
+
+  /*
+  * @function Add tokens in the contract.
+  * Returns a boolean value indicating whether the operation succeeded.
+  */
+  function addTokens(uint256 _tokens) public isOwner {
+    require(_tokens.greaterThan(0, "Only positive values are accepted."));
+    require(gamaCoin.transferFrom(tokenOwner, address(this), _tokens));
+    balance = _tokens;            
+  }
+
+  /*
   * @function Transfere todos os ethers e tokens do contrato para carteira do owner,
   * requer que seja chamada pelo owner.
-  * Retorna um valor booleano indicando se a operação foi bem sucedida.
+  * Returns a boolean value indicating whether the operation succeeded.
   */
   function withdrawBalance() public isOwner returns(bool){
     require(gamaCoin.transfer(owner, gamaCoin.balanceOf(address(this))));
     owner.transfer(address(this).balance);
     return true;
-  }
-
-  function requestBalance() private isOwner {
-    uint256 value = gamaCoin.getTotalSupply() * 1/2;
-    require(gamaCoin.transferFrom(tokenOwner, address(this), value));
-    balance = value;            
   }
 }
