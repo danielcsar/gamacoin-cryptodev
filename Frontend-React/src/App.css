@@ -1,0 +1,49 @@
+/* .btn {
+  font-size: 1rem;
+  font-family: "Poppins", Sans-serif;
+} */
+
+.img{
+  margin-left: 6rem
+}
+
+.App-header {
+  font-size: calc(10px + 2vmin);
+  color: black;
+  border: 1px solid white;
+}
+
+/* .event {
+  max-height: fit-content;
+} */
+
+button {
+  color: #273338;
+  font-size: calc(10px + 1vmin);
+}
+
+button:hover {
+  background-color: #F58A1F;
+  font-size: calc(10px + 1vmin);
+}
+/* 
+div.tela h1{
+  font-size: calc(10px + 2vmin);
+  height: 20px;
+}
+
+div.tela h2{
+  font-size: calc(10px + 1vmin);
+}
+
+@media (max-width: 1024px) {
+  .close {
+    display: none;
+  }
+}
+
+@media (max-width: 512px) {
+  .img {
+    margin-left: 3rem
+  }
+} */
