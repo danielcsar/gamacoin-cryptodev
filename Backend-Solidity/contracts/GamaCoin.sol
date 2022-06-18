@@ -29,6 +29,11 @@ contract GamaCoin is IERC20 {
         require(msg.sender == owner , "Sender is not owner!");
         _;
     }
+
+    modifier isActive() {
+        require(status == Status.ACTIVE, "The contract is not active.");
+        _;
+    }
   
     // Constructor
     constructor(uint256 _inicialSupply) {
@@ -70,39 +75,27 @@ contract GamaCoin is IERC20 {
     }
 
     // Public Functions
-    function transfer(address _to, uint256 _value) external override returns (bool){
-        require(status == Status.ACTIVE, "The contract is not active.");
+    function transfer(address _to, uint256 _value) external isActive override returns (bool){
         require(addressToBalance[msg.sender] >= _value);
-
         addressToBalance[msg.sender] -= _value;
         addressToBalance[_to] += _value;
-
         emit Transfer(msg.sender, _to, _value);
-
         return true;
     }    
 
-    function approve(address _spender, uint256 _value) external override returns (bool){
-        require(status == Status.ACTIVE, "The contract is not active.");
+    function approve(address _spender, uint256 _value) external isActive override returns (bool){
         allowances[msg.sender][_spender] = _value;
-
         emit Approval(msg.sender, _spender, _value);
-
         return true;
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) external override returns (bool){
-        require(status == Status.ACTIVE, "The contract is not active.");
+    function transferFrom(address _from, address _to, uint256 _value) external isActive override returns (bool){
         require(_value <= addressToBalance[_from]);
-        // require(_value <= allowances[_from][msg.sender]);
-
+        require(_value <= allowances[_from][msg.sender]);
         addressToBalance[_from] -= _value;
         addressToBalance[_to] += _value;
-
-        // allowances[_from][msg.sender] -= _value;
-
+        allowances[_from][msg.sender] -= _value;
         emit Transfer(_from, _to, _value);
-
         return true;
     }
 

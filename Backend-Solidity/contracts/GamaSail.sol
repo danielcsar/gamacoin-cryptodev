@@ -32,14 +32,23 @@ contract GamaSail {
     _;
   }
 
+  modifier isPositive() {
+    require(msg.value.greaterThan(0, "Only positive values are accepted."));
+    _;
+  }
+
+  modifier isValuePositive(uint256 _value) {
+    require(_value.greaterThan(0, "Only positive values are accepted."));
+    _;
+  }
+
   // Constructor
   constructor(address _token) {
     owner = payable(msg.sender);
     tokenAddress = _token;
     gamaCoin = GamaCoin(tokenAddress);
     tokenOwner = gamaCoin.getOwner();
-    balance = gamaCoin.balanceOf(address(this));
-    addTokens(gamaCoin.getTotalSupply().div(2));
+    balance = gamaCoin.balanceOf(address(this));    
   }
 
   // Getters and Setters
@@ -82,8 +91,7 @@ contract GamaSail {
   * @function Changes the purchase price of the tokens.
   * Returns a boolean value indicating whether the operation was successful.
   */
-  function setTokenBuyPrice(uint256 _newPrice) public isOwner returns (bool){
-    require(_newPrice.greaterThan(0, "Only positive values are accepted."));
+  function setTokenBuyPrice(uint256 _newPrice) public isOwner isValuePositive(_newPrice) returns (bool){
     tokenBuyPrice = _newPrice;
     return true;
   }
@@ -92,8 +100,7 @@ contract GamaSail {
   * @function Changes the selling price of tokens.
   * Returns a boolean value indicating whether the operation was successful.
   */
-  function setTokenSellPrice(uint256 _newPrice) public isOwner returns (bool){
-    require(_newPrice.greaterThan(0, "Only positive values are accepted."));
+  function setTokenSellPrice(uint256 _newPrice) public isOwner isValuePositive(_newPrice) returns (bool){
     tokenSellPrice = _newPrice;
     return true;
   }
@@ -103,8 +110,7 @@ contract GamaSail {
   * @function Purchases tokens using ethers sent by msg.sender.
   * Returns a boolean value indicating whether the operation was successful.
   */
-  function buyTokens() public payable returns(bool){
-    require(msg.value.greaterThan(0, "Only positive values are accepted."));
+  function buyTokens() public isPositive payable returns(bool){
     require(msg.value.greaterOrEqual(tokenBuyPrice, "Insuficient amount"));
     uint256 value = msg.value.div(tokenBuyPrice);
     require(gamaCoin.balanceOf(address(this)).greaterOrEqual(value,"Insuficient amount of tokens in contract"));
@@ -119,12 +125,10 @@ contract GamaSail {
   * @function Sells tokens sent by msg.sender.
   * Returns a boolean value indicating whether the operation was successful.
   */
-  function sellTokens(uint256 _tokensToSell) public returns(bool){
-    require(_tokensToSell.greaterThan(0, "Only positive values are accepted."));
+  function sellTokens(uint256 _tokensToSell) public isValuePositive(_tokensToSell) returns(bool){
     uint256 value = _tokensToSell.mul(tokenSellPrice);
     require(getBalanceEthers() >= value, "Contract without sufficient balance.");
     require(gamaCoin.balanceOf(msg.sender) >= _tokensToSell, "Sender without sufficient balance.");
-    gamaCoin.approve(address(this), _tokensToSell);
     require(gamaCoin.transferFrom(msg.sender, address(this), _tokensToSell));
     payable(msg.sender).transfer(value);
 
@@ -136,8 +140,7 @@ contract GamaSail {
   * @function Add Ethers in the contract.
   * Returns a boolean value indicating whether the operation was successful.
   */
-  function addEthers() public isOwner payable returns(bool){
-    require(msg.value.greaterThan(0, "Only positive values are accepted."));
+  function addEthers() public isOwner isPositive payable returns(bool){
     return true;
   }
 
@@ -145,8 +148,7 @@ contract GamaSail {
   * @function Add tokens in the contract.
   * Returns a boolean value indicating whether the operation succeeded.
   */
-  function addTokens(uint256 _tokens) public isOwner {
-    require(_tokens.greaterThan(0, "Only positive values are accepted."));
+  function addTokens(uint256 _tokens) public isOwner isValuePositive(_tokens) {
     require(gamaCoin.transferFrom(tokenOwner, address(this), _tokens));
     balance = _tokens;            
   }

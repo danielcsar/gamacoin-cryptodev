@@ -111,6 +111,20 @@ describe("GamaSail", async function () {
     expect(newWallet1Balance).to.equal(transferedValue);
   }),
 
+  it("TransferFrom", async function () {
+    const [owner, wallet1, wallet2] = await ethers.getSigners();
+    const Token = await ethers.getContractFactory("GamaCoin",owner);
+    const token = await Token.deploy(1000);
+
+    await token.connect(owner).approve(wallet1.address, 50);
+
+    expect(await token.allowance(owner.address, wallet1.address)).to.equal(50);
+
+    await token.connect(wallet1).transferFrom(owner.address, wallet2.address, 50);
+
+    expect(await token.balanceOf(wallet2.address)).to.equal(50);
+  }),
+
   it("Change status of the GamaCoin contract", async function() {
     const [owner] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);

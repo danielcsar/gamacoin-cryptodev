@@ -5,10 +5,12 @@ describe("GamaSail", async function () {
   
   it("Get token balance of the GamaSail contract", async function() {
     // Instances
-    const Token = await ethers.getContractFactory("GamaCoin");
+    const [owner] = await ethers.getSigners();
+    const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
-    const Sail = await ethers.getContractFactory("GamaSail");
+    const Sail = await ethers.getContractFactory("GamaSail", owner);
     const sail = await Sail.deploy(token.address);
+    await token.connect(owner).transfer(sail.address, 1000);
 
     // Assertions
     assert.notEqual(await sail.getBalance(), 0);
@@ -22,6 +24,7 @@ describe("GamaSail", async function () {
     const token = await Token.deploy(2000);
     const Sail = await ethers.getContractFactory("GamaSail", owner);
     const sail = await Sail.deploy(token.address);
+    await token.connect(owner).transfer(sail.address, 1000);
 
     // Assertions
     assert.equal(await sail.getTokensSold(), 0);
@@ -95,7 +98,8 @@ describe("GamaSail", async function () {
 
     const Sail = await ethers.getContractFactory("GamaSail", owner);
     const sail = await Sail.deploy(token.address);
-    
+    await token.connect(owner).transfer(sail.address, 1000);
+
     // Trying to buy with 0 ethers
     expect(sail.connect(wallet1).buyTokens({ value: 0 }))
       .to.be.revertedWith("Only positive values are accepted.");
@@ -123,22 +127,22 @@ describe("GamaSail", async function () {
 
     const Sail = await ethers.getContractFactory("GamaSail", owner);
     const sail = await Sail.deploy(token.address);
+    // 
+    await token.connect(owner).transfer(sail.address,1000);
 
     const amount = ethers.utils.parseEther("2.0");
+    await sail.connect(owner).addEthers({ value: amount });
+
+    //Comprando tokens 
     await sail.connect(wallet1).buyTokens({ value: amount });
-    await token.connect(owner).transfer(wallet2.address, 10);
+    await token.connect(wallet1).approve(sail.address, 2); 
 
     // Trying to Sell with 0 tokens
     expect(sail.connect(wallet2).sellTokens(0))
       .to.be.revertedWith("Only positive values are accepted.");
 
     // Selling with correct value
-    const wallet2Before = await wallet2.getBalance();
-    await sail.connect(wallet2).sellTokens(1);
-    const wallet2After = await wallet2.getBalance();
-
-    // Assertion
-    assert.notEqual(wallet2After, wallet2Before);
+    expect(await sail.connect(wallet1).sellTokens(1)).to.be.changeEtherBalance(wallet1, 1);
   }),
   
   it("Add Ethers in the contract", async function() {
@@ -173,6 +177,8 @@ describe("GamaSail", async function () {
 
     const Sail = await ethers.getContractFactory("GamaSail", owner);
     const sail = await Sail.deploy(token.address);
+    await token.connect(owner).approve(sail.address, 2000);
+    await sail.connect(owner).addTokens(1000);
     const balanceBefore = await sail.getBalance();
 
     // Trying to send 0 ethers.
