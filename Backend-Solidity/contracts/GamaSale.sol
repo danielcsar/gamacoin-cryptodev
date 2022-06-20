@@ -11,13 +11,14 @@ contract GamaSale {
   using Math for uint256;
 
   // Properties
-  uint256 public tokenBuyPrice = 1 ether;
-  uint256 public tokenSellPrice = 1 ether;
-  uint256 public tokensSold;
+  uint256 private tokenBuyPrice = 1 ether;
+  uint256 private tokenSellPrice = 1 ether;
+  uint256 private tokensSold;
+  uint256 private tokensPurchased;
   uint256 private balance;
   address payable private owner;
 
-  address public tokenAddress;
+  address private tokenAddress;
   address private tokenOwner;
   GamaCoin private gamaCoin;
   address payable contractAddress = payable(address(this));
@@ -64,6 +65,13 @@ contract GamaSale {
   */
   function getTokensSold() public view returns (uint256){
     return tokensSold;
+  }
+
+  /*
+  * @function Returns the amount of tokens Purchased.
+  */
+  function getTokensPurchased() public view returns (uint256){
+    return tokensPurchased;
   }
 
   /*
@@ -116,7 +124,6 @@ contract GamaSale {
     require(gamaCoin.balanceOf(address(this)).greaterOrEqual(value,"Insuficient amount of tokens in contract"));
     require(gamaCoin.transfer(msg.sender, value));
     tokensSold += value;
-
     emit Buy(msg.sender, value);
     return true;
   }
@@ -131,7 +138,7 @@ contract GamaSale {
     require(gamaCoin.balanceOf(msg.sender) >= _tokensToSell, "Sender without sufficient balance.");
     require(gamaCoin.transferFrom(msg.sender, address(this), _tokensToSell));
     payable(msg.sender).transfer(value);
-
+    tokensPurchased += _tokensToSell; 
     emit Sell(msg.sender, _tokensToSell);
     return true;
   }

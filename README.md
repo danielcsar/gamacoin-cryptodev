@@ -1,52 +1,83 @@
 # 🏦 Gama Token 📚 Web 3.0
 
-<p align="center">
-  <img src="https://media.tenor.com/images/63dc70b43a949617fdfa3447868d534d/tenor.gif" alt="Hulk Smart"/>
-</p>
+Projeto Final aplicado a Turma Blockchain CryptoDev parceria entre a Gama Academy e a Blockchain Academy.
 
-Em nossa carreira é cada vez mais necessário que tenhamos meios de expandir nosso conhecimento, pois como diz o ditado "não tá facil pra ninguém", não é mesmo ? Sendo assim, queremos criar uma maneira para que pessoas de investir na educação e na comunidade, assim todos poderão aprender e ajudar a crescer.
+## Backend - Solidity !
+
+Projeto de backend composto de dois smart-contracts: `GamaCoin` - Contrato de Token ERC-20 e `GamaSale` - Contrato de Venda de Tokens.
+
+Endereço dos contratos na Rede de testes Ropsten:
+
+"0x0269ca8225dC83318a1836927263fabD24654C3d" - [GamaCoin](https://ropsten.etherscan.io/address/0x0269ca8225dC83318a1836927263fabD24654C3d).
+"0xe099d38C8323976A853cfBf457be669a8B95C916" - [GamaSale](https://ropsten.etherscan.io/address/0xe099d38C8323976A853cfBf457be669a8B95C916).
+
+### Como Rodar
+
+#### Pré-requisitos
+
+- [Nodejs](https://nodejs.org/en/) (v16 ou superior)
+- [RemixIDE](https://remix.ethereum.org/)
+
+#### Rodando o projeto
+
+Copie os contratos disponíveis [aqui](https://github.com/danielcsar/gamacoin-cryptodev/tree/main/Backend-Solidity/contracts) para o [RemixIDE](https://remix.ethereum.org/), faça a compilação e depois o deploy do `GamaCoin.sol` e depois do `GamaSale.sol`.
+Necessário especificar o `inicialSupply` (Total de tokens) no deploy do `GamaCoin` e especificar o `address` (Endereço do GamaCoin) no deploy do `GamaSale`.
+
+Para os testes, baixe ou faça um clone do projeto [Backend-Solidity](https://github.com/danielcsar/gamacoin-cryptodev/tree/main/Backend-Solidity).
+
+Na raiz do projeto execute os seguintes comandos:
+
+```bash
+# Instalando dependências
+$ npm install
+# Compilando os contratos
+$ npx hardhat compile
+# Rodando os testes
+$ npm test
+```
+
+## Funcionalidades GamaCoin
+* Funções Getters:
+    * getName() - Retorna o nome do Token.
+    * getSymbol() - Retorna o símbolo do token.
+    * getDecimals() - Retorna o número de casas decimais após a vírgula.
+    * getTotalSupply() - Retorna o total de tokens já criados pelo contrato.
+    * getOwner() - Retorna o dono do contrato (address que criou o contrato).
+    * getStatus() - Retorna o estado do contrato: 0 - Ativo, 1 - Pausado, 2 - Cancelado.
+* Funções Públicas:
+    * balanceOf(address _account) - Retorna o total de tokens do endereço `_account` fornecido.
+    * allowance(address _owner, address _spender) - Retorna o total de tokens do `_owner` que o `_spender` pode movimentar.
+    * transfer(address _to, uint256 _value) - Transfere o `_value` do remetente para o endereço `_to`.
+    * approve(address _spender, uint256 _value) - Autoriza o endereço `_spender` a utilizar o `_value` do endereço do remetente.
+    * transferFrom(address _from, address _to, uint256 _value) - Tranfere do valor `_value` do endereço `_from` para o endereço `_to`.
+    * changeStatus(uint256 _status) - Troca o estado do contrato de acordo com o número fornecido: 0 - Ativo, 1 - Pausado, 2 - Cancelado, requer que seja chamada pelo proprietário.
+    * kill() - Tranfere os ethers do contrato para o owner e destroi o contrato, requer que seja chamada pelo proprietário.
 
 
-## Acelerando carreiras na Web 3.0 !
-
-Ainda estamos em desenvolvimento e você juntamente com seu time deverão ser capazes de construir nosso MVP (Minimo Produto Viavel) de uma aplicação de _Vending Machine_ e garantir que possamos disponibilizar para o time de DApps a implementação do nosso Contrato Inteligente, que para nós, será um divisor de aguas na sua carreira (sacoou?)
-
-## Objetivo
-Construir um `Smart Contract` , utilizando `Solidity` e todas as bibliotecas e tecnologias que aprendemos durante o curso (você é livre para substitui-lás, mas fica por sua conta e risco, ok ?) e disponibiliza-las na rede `Ethereum`.
-
-
-## Artefatos e entregaveis
-* Código Fonte (Solidity)
-* Fork deste repositório contendo:
-    * Instruções de Instalação e operação
-    * Detalhamento das funcionalidades
-    * Endereço dos contratos e a rede em que ela foi publicada.
-    * Membros envolvidos no projeto com seus perfis do github associados
-
-
-## Orientações
-Tenha sempre testes unitários no seu projeto.
-
-
-## Critérios de aceite 
-1. Criou o próprio Contrato Inteligente de Token.
-2. Criou o próprio Contrato Ingeligente de Maquina de Venda do Token.
-3. O Comprador deve ser possivel comprar tokens com _ethers_.
-4. O Vendedor deve ser possivel vender tokens por _ethers_.
-5. O administrador deve ser capaz de reabastecer a maquina com _tokens_ e _ethers_.
-6. O adminsitrador deve ser capaz de sacar o saldo em _ethers_
-7. O administrador deve ser capaz de redefinir o valor dos _tokens_ para compra.
-8. O administrador deve ser capaz de redefinir o valor dos _tokens_ para venda.
-9. Não deve ser possivel comprar _tokens_ com valor zero.
-10. Não deve ser possivel vender _tokens_ com valor zero.
-11. Não deve ser possivel reabastecer a maquina com _tokens_ com valor zero.
-12. Não deve ser possivel reabastecer a maquina com _ethers_ com valor zero.
+## Funcionalidades GamaSale
+* Funções Getters & Setters:
+    * getBalance() - Retorna o total de tokens no contrato.
+    * getTokensSold() - Retorna o total de tokens vendidos pelo contrato.
+    * getTokensPurchased() - Retorna o total de tokens comprados pelo contrato.
+    * getBalanceEthers() - Retorna o total de ethers no contrato.
+    * getTokenBuyPrice() - Retorna o preço de compra dos tokens.
+    * getTokenSellPrice() - Retorna o preço de venda dos tokens.
+    * setTokenBuyPrice(uint256 _newPrice) - Altera o preço de compra dos tokens com o `_newPrice`, requer que seja chamada pelo proprietário.
+    * setTokenSellPrice(uint256 _newPrice) - Altera o preço de venda dos tokens com o `_newPrice`, requer que seja chamada pelo proprietário.
+* Funções Públicas:
+    * buyTokens() - Compra tokens usando ethers enviados pelo remetente (Contrato recebe ethers/Remetente recebe tokens).
+    * sellTokens(uint256 _tokensToSell) - Vende os tokens `_tokensToSell` enviados pelo remetente (Contrato recebe tokens/Remetente recebe ethers)..
+    * addEthers() - Adiciona ethers para o endereço do contrato, requer que seja chamada pelo proprietário.
+    * addTokens(uint256 _tokens) - Adiciona tokens `_tokens` para o endereço do contrato, requer que seja chamada pelo proprietário.
+    * withdrawBalance() - Transfere todos os ethers e tokens do contrato para a carteira do proprietário, requer que seja chamada pelo proprietário.
 
 
 
+## Frontend - React !
+`Em breve`.
 
+## Desenvolvedores
 
-
-
-
-
+Daniel         |
+-------------- |
+<a href="https://www.linkedin.com/in/danielcsar/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
