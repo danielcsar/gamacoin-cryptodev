@@ -26,7 +26,7 @@ contract GamaCoin is IERC20 {
     
     // Modifiers
     modifier isOwner() {
-        require(msg.sender == owner , "Sender is not owner!");
+        require(msg.sender == owner, "Sender is not owner!");
         _;
     }
 

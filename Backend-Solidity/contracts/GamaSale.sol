@@ -5,7 +5,7 @@ import "hardhat/console.sol";
 import "./Math.sol";
 import "./GamaCoin.sol";
 
-contract GamaSail {
+contract GamaSale {
 
   // Instances/Libs
   using Math for uint256;

@@ -1,62 +1,62 @@
 const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("GamaSail", async function () {
+describe("GamaSale", async function () {
   
-  it("Get token balance of the GamaSail contract", async function() {
+  it("Get token balance of the GamaSale contract", async function() {
     // Instances
     const [owner] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
-    await token.connect(owner).transfer(sail.address, 1000);
+    const Sale = await ethers.getContractFactory("GamaSale", owner);
+    const sale = await Sale.deploy(token.address);
+    await token.connect(owner).transfer(sale.address, 1000);
 
     // Assertions
-    assert.notEqual(await sail.getBalance(), 0);
-    assert.equal(await sail.getBalance(), 1000);
+    assert.notEqual(await sale.getBalance(), 0);
+    assert.equal(await sale.getBalance(), 1000);
   }),
 
-  it("Get total tokens sold by the GamaSail contract", async function() {
+  it("Get total tokens sold by the GamaSale contract", async function() {
     //Instances
     const [owner, wallet1] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
-    await token.connect(owner).transfer(sail.address, 1000);
+    const Sale = await ethers.getContractFactory("GamaSale", owner);
+    const sale = await Sale.deploy(token.address);
+    await token.connect(owner).transfer(sale.address, 1000);
 
     // Assertions
-    assert.equal(await sail.getTokensSold(), 0);
+    assert.equal(await sale.getTokensSold(), 0);
     
     // Buying 1 token;
     const amount = ethers.utils.parseEther("1.0");
-    await sail.connect(wallet1).buyTokens({ value: amount });
+    await sale.connect(wallet1).buyTokens({ value: amount });
 
     // Assertions
-    assert.equal(await sail.getTokensSold(), 1);
+    assert.equal(await sale.getTokensSold(), 1);
   }),
 
-  it("Get ethers balance of the GamaSail contract", async function() {
+  it("Get ethers balance of the GamaSale contract", async function() {
     //Instances
     const [owner] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
+    const Sale = await ethers.getContractFactory("GamaSale", owner);
+    const sale = await Sale.deploy(token.address);
     
     // Assertions
     const zero = ethers.utils.parseEther("0");
-    const balanceBefore = await sail.getBalanceEthers();
+    const balanceBefore = await sale.getBalanceEthers();
 
     expect(balanceBefore).to.be.equals(zero);
     
     // Buying 1 token;
     const amount = ethers.utils.parseEther("1.0");
-    await sail.connect(owner).addEthers({ value: amount })
+    await sale.connect(owner).addEthers({ value: amount })
 
     // Assertions
-    const balanceAfter = await sail.getBalanceEthers();
+    const balanceAfter = await sale.getBalanceEthers();
     
     expect(balanceAfter).to.be.equals(amount);
   }),
@@ -66,26 +66,26 @@ describe("GamaSail", async function () {
     const [owner] = await ethers.getSigners();
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
+    const Sale = await ethers.getContractFactory("GamaSale", owner);
+    const sale = await Sale.deploy(token.address);
 
     // Variables
     const oneEther = ethers.utils.parseEther("1.0");
     const twoEthers = ethers.utils.parseEther("2.0");
-    const buyPriceBefore = await sail.getTokenBuyPrice();
-    const sellPriceBefore = await sail.getTokenSellPrice();
+    const buyPriceBefore = await sale.getTokenBuyPrice();
+    const sellPriceBefore = await sale.getTokenSellPrice();
 
     // Assertions getters
     expect(buyPriceBefore).to.be.equals(oneEther);
     expect(sellPriceBefore).to.be.equals(oneEther);
 
     // Setting new prices
-    await sail.setTokenBuyPrice(twoEthers);
-    await sail.setTokenSellPrice(twoEthers);
+    await sale.setTokenBuyPrice(twoEthers);
+    await sale.setTokenSellPrice(twoEthers);
 
     // Assertions setters
-    const buyPriceAfter = await sail.getTokenBuyPrice();
-    const sellPriceAfter = await sail.getTokenSellPrice();
+    const buyPriceAfter = await sale.getTokenBuyPrice();
+    const sellPriceAfter = await sale.getTokenSellPrice();
     assert.notEqual(buyPriceBefore, buyPriceAfter);
     assert.notEqual(sellPriceBefore, sellPriceAfter);
   }),
@@ -96,23 +96,23 @@ describe("GamaSail", async function () {
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
 
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
-    await token.connect(owner).transfer(sail.address, 1000);
+    const Sale = await ethers.getContractFactory("GamaSale", owner);
+    const sale = await Sale.deploy(token.address);
+    await token.connect(owner).transfer(sale.address, 1000);
 
     // Trying to buy with 0 ethers
-    expect(sail.connect(wallet1).buyTokens({ value: 0 }))
+    expect(sale.connect(wallet1).buyTokens({ value: 0 }))
       .to.be.revertedWith("Only positive values are accepted.");
 
     // Trying to buy with fewer ethers than the token price
     const amountMinor = ethers.utils.parseEther("0.5");
-    expect(sail.connect(wallet1).buyTokens({ value: amountMinor }))
+    expect(sale.connect(wallet1).buyTokens({ value: amountMinor }))
       .to.be.revertedWith("Insuficient amount");
 
     // Buying with correct value
     const amount = ethers.utils.parseEther("1.0");
     const wallet1Before = await token.connect(owner).balanceOf(wallet1.address);
-    await sail.connect(wallet1).buyTokens({ value: amount });
+    await sale.connect(wallet1).buyTokens({ value: amount });
     const wallet1After = await token.connect(owner).balanceOf(wallet1.address);
 
     // Assertion
@@ -125,24 +125,24 @@ describe("GamaSail", async function () {
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
 
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
+    const Sale = await ethers.getContractFactory("GamaSale", owner);
+    const sale = await Sale.deploy(token.address);
     // 
-    await token.connect(owner).transfer(sail.address,1000);
+    await token.connect(owner).transfer(sale.address,1000);
 
     const amount = ethers.utils.parseEther("2.0");
-    await sail.connect(owner).addEthers({ value: amount });
+    await sale.connect(owner).addEthers({ value: amount });
 
     //Comprando tokens 
-    await sail.connect(wallet1).buyTokens({ value: amount });
-    await token.connect(wallet1).approve(sail.address, 2); 
+    await sale.connect(wallet1).buyTokens({ value: amount });
+    await token.connect(wallet1).approve(sale.address, 2); 
 
     // Trying to Sell with 0 tokens
-    expect(sail.connect(wallet2).sellTokens(0))
+    expect(sale.connect(wallet2).sellTokens(0))
       .to.be.revertedWith("Only positive values are accepted.");
 
     // Selling with correct value
-    expect(await sail.connect(wallet1).sellTokens(1)).to.be.changeEtherBalance(wallet1, 1);
+    expect(await sale.connect(wallet1).sellTokens(1)).to.be.changeEtherBalance(wallet1, 1);
   }),
   
   it("Add Ethers in the contract", async function() {
@@ -151,19 +151,19 @@ describe("GamaSail", async function () {
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
 
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
-    const balanceBefore = await sail.getBalanceEthers();
+    const Sale = await ethers.getContractFactory("GamaSale", owner);
+    const sale = await Sale.deploy(token.address);
+    const balanceBefore = await sale.getBalanceEthers();
     
     // Trying to send 0 ethers.
-    expect(sail.connect(owner).addEthers({ value: 0 }))
+    expect(sale.connect(owner).addEthers({ value: 0 }))
       .to.be.revertedWith("Only positive values are accepted.");
 
     // Adding Ethers
     const amount = ethers.utils.parseEther("2.0");
-    await sail.connect(owner).addEthers({ value: amount });
+    await sale.connect(owner).addEthers({ value: amount });
     
-    const balanceAfter = await sail.getBalanceEthers();
+    const balanceAfter = await sale.getBalanceEthers();
 
     // Assertion
     assert.notEqual(balanceBefore, balanceAfter);
@@ -175,20 +175,20 @@ describe("GamaSail", async function () {
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
 
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
-    await token.connect(owner).approve(sail.address, 2000);
-    await sail.connect(owner).addTokens(1000);
-    const balanceBefore = await sail.getBalance();
+    const Sale = await ethers.getContractFactory("GamaSale", owner);
+    const sale = await Sale.deploy(token.address);
+    await token.connect(owner).approve(sale.address, 2000);
+    await sale.connect(owner).addTokens(1000);
+    const balanceBefore = await sale.getBalance();
 
     // Trying to send 0 ethers.
-    expect(sail.connect(owner).addTokens(0))
+    expect(sale.connect(owner).addTokens(0))
       .to.be.revertedWith("Only positive values are accepted.");
 
     // Adding Tokens;
-    await sail.connect(owner).addTokens(10);
+    await sale.connect(owner).addTokens(10);
     
-    const balanceAfter = await sail.getBalance();
+    const balanceAfter = await sale.getBalance();
 
     // Assertion
     assert.notEqual(balanceBefore, balanceAfter);
@@ -200,20 +200,20 @@ describe("GamaSail", async function () {
     const Token = await ethers.getContractFactory("GamaCoin", owner);
     const token = await Token.deploy(2000);
 
-    const Sail = await ethers.getContractFactory("GamaSail", owner);
-    const sail = await Sail.deploy(token.address);
-    const tokensBefore = await sail.getBalance();
-    const ethersBefore = await sail.getBalanceEthers();
+    const Sale = await ethers.getContractFactory("GamaSale", owner);
+    const sale = await Sale.deploy(token.address);
+    const tokensBefore = await sale.getBalance();
+    const ethersBefore = await sale.getBalanceEthers();
 
     // Adding Ethers
     const amount = ethers.utils.parseEther("2.0");
-    await sail.connect(owner).addEthers({ value: amount });
+    await sale.connect(owner).addEthers({ value: amount });
 
     // Withdrawing funds;
-    await sail.connect(owner).withdrawBalance();
+    await sale.connect(owner).withdrawBalance();
 
-    const tokensAfter = await sail.getBalance();
-    const ethersAfter = await sail.getBalanceEthers();
+    const tokensAfter = await sale.getBalance();
+    const ethersAfter = await sale.getBalanceEthers();
 
     // Assertion
     assert.notEqual(tokensBefore, tokensAfter);
