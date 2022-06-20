@@ -1,29 +1,36 @@
 import { useState, useEffect } from "react";
-import { ethers } from "ethers";
-import GAMASAILabi from "./GAMASAILabi.json";
-import ErrorMessage from "./ErrorMessage";
-import TxList from "./TxList";
+import { ethers, BigNumber } from "ethers";
+import GamaCoinABI from "./GamaCoinABI.json";
+import GamaSaleABI from "./GamaSaleABI.json";
+import NavBar from "./components/NavBar";
+import Button from "react-bootstrap/Button";
+import KPI from "./components/KPIs";
+import Token from "./components/Token";
+import Sale from "./components/Sale";
+import Event from "./components/Event";
 import "./App.css";
 
-export default function App() {
+function App() {
   const [txs, setTxs] = useState([]);
   const [contractListened, setContractListened] = useState();
-  const [error, setError] = useState();
-  const [contractInfo, setContractInfo] = useState({
+  const [contractToken, setcontractToken] = useState({
     address: "-",
     tokenName: "-",
     tokenSymbol: "-",
     totalSupply: "-",
   });
-  const [balanceInfo, setBalanceInfo] = useState({
+  const [contractSale, setcontractSale] = useState({
     address: "-",
-    balance: "-",
+    tokenSold: "-",
+    tokensPurchased: "-",
+    tokenBuyPrice: "-",
+    tokenSellPrice: "-",
   });
 
   useEffect(() => {
-    if (contractInfo.address !== "-") {
+    if (contractSale.address !== "-") {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const gamaSail = new ethers.Contract(contractInfo.address, GAMASAILabi, provider);
+      const gamaSail = new ethers.Contract(contractToken.address, GamaSaleABI, provider);
 
       gamaSail.on("Transfer", (from, to, amount, event) => {
         console.log({ from, to, amount, event });
@@ -44,187 +51,89 @@ export default function App() {
         contractListened.removeAllListeners();
       };
     }
-  }, [contractInfo.address]);
+  }, [contractToken.address]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmitToken = async (e) => {
     e.preventDefault();
-    const data = new FormData(e.target);
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const contractAddress = "0x9D24fCb372c728d16DafD3CC99272Ca917b1b3B1";
-    const gamaSail = new ethers.Contract(contractAddress, GAMASAILabi, provider);
+    const contractAddress = "0x0269ca8225dC83318a1836927263fabD24654C3d";
+    const gamaToken = new ethers.Contract(contractAddress, GamaCoinABI, provider);
 
-    const tokenName = await gamaSail.getName();
-    const tokenSymbol = await gamaSail.getSymbol();
-    const totalSupply = await gamaSail.getTotalSupply();
+    const tokenName = await gamaToken.getName();
+    const tokenSymbol = await gamaToken.getSymbol();
+    const totalSupply = await gamaToken.getTotalSupply();
 
-    setContractInfo({
-      address: data.get("addr"),
-      tokenName,
-      tokenSymbol,
-      totalSupply,
+    setcontractToken({
+      address: contractAddress,
+      tokenName: tokenName,
+      tokenSymbol: tokenSymbol,
+      totalSupply: totalSupply.toNumber(),
     });
   };
 
-  const getMyBalance = async () => {
+  const handleSubmitSale = async (e) => {
+    e.preventDefault();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const gamaSail = new ethers.Contract(contractInfo.address, GAMASAILabi, provider);
-    const signer = await provider.getSigner();
-    const signerAddress = await signer.getAddress();
-    const balance = await gamaSail.balanceOf(signerAddress);
+    const contractAddress = "0xe099d38C8323976A853cfBf457be669a8B95C916";
+    const gamaSale = new ethers.Contract(contractAddress, GamaSaleABI, provider);
 
-    setBalanceInfo({
-      address: signerAddress,
-      balance: String(balance),
+    const tokenSold = await gamaSale.getTokensSold();
+    const tokensPurchased = await gamaSale.getTokensPurchased();
+    const tokenBuyPrice = await gamaSale.getTokenBuyPrice();
+    const tokenSellPrice = await gamaSale.getTokenSellPrice();
+
+    setcontractSale({
+      address: contractAddress,
+      tokenSold: ethers.utils.formatEther(BigNumber.from(tokenSold)),
+      tokensPurchased: ethers.utils.formatEther(BigNumber.from(tokensPurchased)),
+      tokenBuyPrice: ethers.utils.formatEther(BigNumber.from(tokenBuyPrice)),
+      tokenSellPrice: ethers.utils.formatEther(BigNumber.from(tokenSellPrice)),
     });
   };
 
-  const handleTransfer = async (e) => {
-    e.preventDefault();
-    const data = new FormData(e.target);
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = await provider.getSigner();
-    const gamaSail = new ethers.Contract(contractInfo.address, GAMASAILabi, signer);
-    await gamaSail.transfer(data.get("recipient"), data.get("amount"));
-  };
+  // const getMyBalance = async () => {
+  //   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //   await provider.send("eth_requestAccounts", []);
+  //   const gamaSail = new ethers.Contract(contractInfo.address, GAMASAILabi, provider);
+  //   const signer = await provider.getSigner();
+  //   const signerAddress = await signer.getAddress();
+  //   const balance = await gamaSail.balanceOf(signerAddress);
+
+  //   setBalanceInfo({
+  //     address: signerAddress,
+  //     balance: String(balance),
+  //   });
+  // };
+
+  // const handleTransfer = async (e) => {
+  //   e.preventDefault();
+  //   const data = new FormData(e.target);
+  //   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //   await provider.send("eth_requestAccounts", []);
+  //   const signer = await provider.getSigner();
+  //   const gamaSail = new ethers.Contract(contractInfo.address, GAMASAILabi, signer);
+  //   await gamaSail.transfer(data.get("recipient"), data.get("amount"));
+  // };
 
   return (
     <>
-    <div className="grid grid-cols-1 gap-2 m-full flex-row">
-      <div className="flex h-24 Container m-full w-full flex-row">
-        <div className="bg-white w-full flex justify-between py-6 pr-24">
-          <img
-            src={"https://criptodev.corporate.gama.academy/wp-content/uploads/sites/22/2022/01/logo-cripto-dev.svg"}
-            className="img flex"
-            alt="logo"
-          />
-          <button className="btn font-bold inline-block relative text-cd-blue hover:text-white items-center w-40 h-10 text-center rounded-md">
-            <a className="close" href="https://www.linkedin.com/in/danielcsar/">
-              Linked-In
-            </a>
-          </button>
-          <button className="btn font-bold inline-block relative text-cd-blue hover:text-white items-center w-40 h-10 text-center rounded-md">
-            <a className="close" href="mailto:danielcesar.eng@gmail.com">
-              Email
-            </a>
-          </button>
-          <button className="btn font-bold bg-cd-orange hover:bg-cd-blue inline-block relative text-cd-blue hover:text-white items-center w-40 h-10 text-center rounded-md">
-            <a href="https://github.com/danielcsar">Github</a>
-          </button>
-        </div>
+      <NavBar />
+      <KPI
+        totalSupply={contractToken.totalSupply}
+        tokensSold={contractSale.tokenSold}
+        tokensPurchased={contractSale.tokensPurchased}
+        tokenSellPrice={contractSale.tokenSellPrice}
+        tokenBuyPrice={contractSale.tokenBuyPrice}
+      />
+      <div className="body">
+        <Token/>
+        <Sale/>
+        <Event txs={txs} />
       </div>
-      <div className="grid grid-cols-3 gap-10 mx-8 h-full">
-        <div className="rounded-xl bg-white">
-          <form onSubmit={handleSubmit}>
-            <main className="mt-4 p-4">
-              <h1 className="text-xl font-semibold text-gray-700 text-center">Dados do Contrato</h1>
-              <div className="">
-                <div className="my-3">
-                  <input
-                    type="text"
-                    name="addr"
-                    className="input input-bordered block w-full focus:ring focus:outline-none"
-                    placeholder="ERC20 contract address"
-                  />
-                </div>
-              </div>
-            </main>
-            <footer className="p-4">
-              <button type="submit" className="btn btn-primary submit-button focus:ring focus:outline-none w-full">
-                Get token info
-              </button>
-            </footer>
-            <div className="px-4">
-              <div className="overflow-x-auto">
-                <table className="table w-full">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Symbol</th>
-                      <th>Total supply</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th>{contractInfo.tokenName}</th>
-                      <td>{contractInfo.tokenSymbol}</td>
-                      <td>{String(contractInfo.totalSupply)}</td>
-                      <td>{contractInfo.deployedAt}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div className="p-4">
-              <button
-                onClick={getMyBalance}
-                type="submit"
-                className="btn btn-primary submit-button focus:ring focus:outline-none w-full"
-              >
-                Get my balance
-              </button>
-            </div>
-            <div className="px-4 py-1">
-              <div className="overflow-x-auto">
-                <table className="table w-full">
-                  <thead>
-                    <tr>
-                      <th>Address</th>
-                      <th>Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th>{balanceInfo.address}</th>
-                      <td>{balanceInfo.balance}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div className="rounded-xl bg-white">
-          <div className="mt-4 p-4">
-            <h1 className="text-xl font-semibold text-gray-700 text-center">Write to contract</h1>
-
-            <form onSubmit={handleTransfer}>
-              <div className="my-3">
-                <input
-                  type="text"
-                  name="recipient"
-                  className="input input-bordered block w-full focus:ring focus:outline-none"
-                  placeholder="Recipient address"
-                />
-              </div>
-              <div className="my-3">
-                <input
-                  type="text"
-                  name="amount"
-                  className="input input-bordered block w-full focus:ring focus:outline-none"
-                  placeholder="Amount to transfer"
-                />
-              </div>
-              <footer className="p-4">
-                <button type="submit" className="btn btn-primary submit-button focus:ring focus:outline-none w-full">
-                  Transfer
-                </button>
-              </footer>
-            </form>
-          </div>
-        </div>
-        <div className="event rounded-xl bg-white max-h-screen overflow-auto">
-          <div className="mt-4 p-4">
-            <h1 className="text-xl font-semibold text-gray-700 text-center">Recent transactions</h1>
-            <p>
-              <TxList txs={txs} />
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <Button onClick={handleSubmitToken} />
+      <Button onClick={handleSubmitSale} />
     </>
   );
 }
+
+export default App;

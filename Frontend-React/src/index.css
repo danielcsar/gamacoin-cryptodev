@@ -1,15 +1,4 @@
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
-
-html {
-  --e-global-color-secondary: #273338;
-  height: 100%;
-}
-
 body {
-  background-color: #F58A1F;
-  height: 100%;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -21,4 +10,9 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+html {
+  /* Cores */
+  --cor-fundo-escuro: #042d44;
 }
