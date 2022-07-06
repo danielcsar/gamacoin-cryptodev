@@ -18,6 +18,7 @@ function App() {
     tokenName: "-",
     tokenSymbol: "-",
     totalSupply: "-",
+    tokenStatus: "-",
   });
   const [contractSale, setcontractSale] = useState({
     address: "-",
@@ -26,6 +27,11 @@ function App() {
     tokenBuyPrice: "-",
     tokenSellPrice: "-",
   });
+
+  useEffect(() => {
+    handleSubmitToken();
+    handleSubmitSale();
+  }, []);
 
   useEffect(() => {
     if (contractSale.address !== "-") {
@@ -53,7 +59,7 @@ function App() {
     }
   }, [contractToken.address]);
 
-  const handleSubmitToken = async (e) => {
+  async function handleSubmitToken(e) {
     e.preventDefault();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const contractAddress = "0x0269ca8225dC83318a1836927263fabD24654C3d";
@@ -62,16 +68,19 @@ function App() {
     const tokenName = await gamaToken.getName();
     const tokenSymbol = await gamaToken.getSymbol();
     const totalSupply = await gamaToken.getTotalSupply();
+    const status = await gamaToken.getStatus();
+
 
     setcontractToken({
       address: contractAddress,
       tokenName: tokenName,
       tokenSymbol: tokenSymbol,
       totalSupply: totalSupply.toNumber(),
+      tokenStatus: status,
     });
   };
 
-  const handleSubmitSale = async (e) => {
+  async function handleSubmitSale(e) {
     e.preventDefault();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const contractAddress = "0xe099d38C8323976A853cfBf457be669a8B95C916";
@@ -126,7 +135,7 @@ function App() {
         tokenBuyPrice={contractSale.tokenBuyPrice}
       />
       <div className="body">
-        <Token/>
+        <Token statusProp={contractToken.tokenStatus}/>
         <Sale/>
         <Event txs={txs} />
       </div>
